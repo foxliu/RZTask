@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option csharp_namespace = "RZTask.Common.Protos";
+
+package Agent;
+
+//定义Agent服务
+service AgentService {
+	// Server 向 Agent 分发任务接口
+	rpc ExecuteTask (TaskRequest) returns (stream TaskResponse);
+}
+
+
+// 任务请求
+message TaskRequest {
+	string taskId = 1;		// 任务ID
+	string taskType = 2;	// 任务类型
+	string taskData = 3;	// 任务数据 
+}
+
+// 任务响应
+message TaskResponse {
+	enum TaskStatus {
+		PENDING = 0;
+		IN_PROGRESS = 1;
+		COMPLETED = 2;
+		FAILED = 9;
+	}
+
+	string taskId = 1;		// 任务ID
+	TaskStatus status = 2;		// 任务执行状态
+	string result = 3;		// 任务执行结果
+}

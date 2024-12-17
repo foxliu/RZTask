@@ -1,0 +1,55 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "RZTask.Common.Protos";
+
+package Server;
+
+//定义Server服务
+service ServerService {
+	// Agent 注册接口
+	rpc RegisterAgent (AgentRegistrationRequest) returns (Response);
+	// Agent Heartbeat 
+	rpc AgentHeartbeat (AgentHeartbeatRequest) returns (Response);
+	// 下载文件
+	rpc DownloadFile (DownlaodFileRequest) returns (stream DownloadResponse);
+}
+
+// Agent 注册请求
+message AgentRegistrationRequest {
+	string agentId = 1;		// Agent 的唯一标识
+	string grpcAddress = 2;	// Agent 的 gRPC 地址 
+	string appName = 3;   // 应用名
+	bytes keyData = 4;	// 证书key内容
+	bytes certData = 5;	// 证书内容
+}
+
+message AgentHeartbeatRequest {
+	string agentId = 1;
+}
+
+// Agent 注册响应
+message Response {
+	uint32 code = 1;	// 是否注册成功
+	string message = 2; // 注册反馈信息
+}
+
+// 下载dll文件响应
+message DownloadResponse {
+	enum DownloadStatus {
+		Success = 0;
+		Pending = 1;
+		FAILED = 9;
+	}
+
+	string fileName = 1;		// 文件名
+	DownloadStatus status = 2;		// 下载结果状态
+	string message = 3;		// 执行结果说明，用于失败时显示失败原因
+	bytes content = 4;
+}
+
+
+message DownlaodFileRequest {
+	string agentId = 1;
+	string fileName = 2;
+	string md5 = 3;
+}
