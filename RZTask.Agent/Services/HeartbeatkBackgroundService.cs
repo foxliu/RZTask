@@ -13,7 +13,7 @@ namespace RZTask.Agent.Services
         private readonly LocalInfo _localInfo;
         private CertificateInfo _certificateInfo;
 
-        public HeartbeatkBackgroundService(Serilog.ILogger logger, IConfiguration configuration, 
+        public HeartbeatkBackgroundService(Serilog.ILogger logger, IConfiguration configuration,
             AgentRegistrar agentRegistrar, LocalInfo localInfo, CertificateInfo certificateInfo)
         {
             _configuration = configuration;
@@ -26,18 +26,13 @@ namespace RZTask.Agent.Services
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.Information("Start initialization key and certificate file ...");
-            try
+            var result = await KeyFileInitializeServiceAsync();
+
+            while (!stoppingToken.IsCancellationRequested && !result)
             {
-                KeyFileInitializeServiceAsync().GetAwaiter().GetResult();
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"key and certificate init failed: {ex.Message}");
-                Console.WriteLine(ex.ToString());
-                if (ex.StackTrace != null)
-                {
-                    _logger.Error(ex.StackTrace);
-                }
+                await Task.Delay(10000);
+
+                result = await KeyFileInitializeServiceAsync();
             }
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -89,32 +84,45 @@ namespace RZTask.Agent.Services
             }
         }
 
-        private async Task KeyFileInitializeServiceAsync()
+        private async Task<bool> KeyFileInitializeServiceAsync()
         {
-            var _keyFilePath = _configuration["Kestrel:Endpoints:Grpc:Certificate:KeyPath"];
-            var _certFilePath = _configuration["Kestrel:Endpoints:Grpc:Certificate:Store"];
-            
-            var generator = new KeyAndCertGenerator(_keyFilePath, _certFilePath);
-            generator.GenerateKeyAndCert(ref _certificateInfo);
-
-            _logger.Information($"key and certificate inited, cert file path: {_certFilePath}");
-
-            var localIp = _localInfo.GetIpByInterfaceName("以太网") ?? "255.255.255.255";
-
-            // Generate agent grpc url
-            var grpcUrl = _configuration["Kestrel:Endpoints:Grpc:Url"]!;
-
-            var appName = _localInfo.GetAppName("test");
-
-            var response = await _agentRegistrar.RegisterAsync(localIp, grpcUrl, appName, _certificateInfo.KeyData, _certificateInfo.CertData);
-
-            if (response.Code == 200)
+            var grpcUrl = _configuration["Kestrel:Endpoints:Grpc:Url"];
+            try
             {
-                Console.WriteLine("Init Cert File And Registrat Succfull");
+                var _keyFilePath = _configuration["Kestrel:Endpoints:Grpc:Certificate:KeyPath"];
+                var _certFilePath = _configuration["Kestrel:Endpoints:Grpc:Certificate:Store"];
+
+                var generator = new KeyAndCertGenerator(_keyFilePath, _certFilePath);
+                generator.GenerateKeyAndCert(ref _certificateInfo);
+
+                _logger.Information($"key and certificate inited, cert file path: {_certFilePath}");
+
+                var localIp = _localInfo.GetIpByInterfaceName("以太网") ?? "255.255.255.255";
+
+                var appName = _localInfo.GetAppName("test");
+
+                var response = await _agentRegistrar.RegisterAsync(localIp, grpcUrl!, appName, _certificateInfo.KeyData, _certificateInfo.CertData);
+
+                if (response.Code == 200)
+                {
+                    Console.WriteLine("Init Cert File And Registrat Succfull");
+                    return true;
+                }
+                else
+                {
+                    Console.WriteLine($"向Server注册Agent: {grpcUrl}, 错误: {response.Message}");
+                    return false;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"Init Cert File And Registrat Failed: {response.Message}");
+                _logger.Error($"key and certificate init failed: {ex.Message}");
+                Console.WriteLine($"向Server注册Agent: {grpcUrl}, 错误: {ex.Message}");
+                if (ex.StackTrace != null)
+                {
+                    _logger.Error(ex.StackTrace);
+                }
+                return false;
             }
         }
     }
