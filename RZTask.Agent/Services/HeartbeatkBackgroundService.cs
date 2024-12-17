@@ -25,18 +25,6 @@ namespace RZTask.Agent.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            Console.WriteLine("Start send heartbeat");
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                Console.WriteLine("Start send heartbeat");
-                await SendHeartbeat();
-
-                await Task.Delay(1000, stoppingToken);
-            }
-        }
-
-        public override Task StartAsync(CancellationToken stoppingToken)
-        {
             _logger.Information("Start initialization key and certificate file ...");
             try
             {
@@ -51,8 +39,12 @@ namespace RZTask.Agent.Services
                     _logger.Error(ex.StackTrace);
                 }
             }
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                await SendHeartbeat();
 
-            return Task.CompletedTask;
+                await Task.Delay(TimeSpan.FromSeconds(_configuration.GetValue<int>("Server:HealthInterval")), stoppingToken);
+            }
         }
 
         public override Task StopAsync(CancellationToken cancellationToken)
