@@ -8,7 +8,7 @@ namespace RZTask.Common.Structs
 {
     public class CertificateInfo
     {
-        public byte[] CertData { get; set; }
-        public byte[] KeyData { get; set; }
+        public byte[] Certificate { get; set; }
+        public byte[] PrivateKey { get; set; }
     }
 }

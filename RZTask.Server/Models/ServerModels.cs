@@ -19,11 +19,11 @@ namespace RZTask.Server.Models
         [Required, Column("app_name"), Comment("Agent 应用名")]
         public string AppName { get; set; }
 
-        [Required, Column("key_data"), Comment("证书key内容")]
-        public byte[] KeyData { get; set; }
+        [Required, Column("private_key"), Comment("证书key内容")]
+        public byte[] PrivateKey { get; set; }
 
-        [Required, Column("cert_data"), Comment("证书内容")]
-        public byte[] CertData { get; set; }
+        [Required, Column("certificate"), Comment("证书内容")]
+        public byte[] Certificate { get; set; }
 
         [Required, Column("last_heartbeat"), Comment("上一次心跳时间")]
         public DateTime LastHeartbeat { get; set; }

@@ -72,7 +72,7 @@ namespace RZTask.Agent.Services
                         _logger.Information($"{response.Message}");
                         var appName = _localInfo.GetAppName("test");
 
-                        await _agentRegistrar.RegisterAsync(localIp, grpcUrl, appName, _certificateInfo.KeyData, _certificateInfo.CertData);
+                        await _agentRegistrar.RegisterAsync(localIp, grpcUrl, appName, _certificateInfo.PrivateKey, _certificateInfo.Certificate);
                         return;
                     default:
                         _logger.Error($"Send heartbeat to server: {_agentRegistrar.ServerUrl} failed: {response.Code}:{response.Message}");
@@ -106,7 +106,7 @@ namespace RZTask.Agent.Services
 
             var appName = _localInfo.GetAppName("test");
 
-            var response = await _agentRegistrar.RegisterAsync(localIp, grpcUrl, appName, _certificateInfo.KeyData, _certificateInfo.CertData);
+            var response = await _agentRegistrar.RegisterAsync(localIp, grpcUrl, appName, _certificateInfo.PrivateKey, _certificateInfo.Certificate);
 
             if (response.Code == 200)
             {

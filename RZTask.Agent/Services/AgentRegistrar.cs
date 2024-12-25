@@ -21,15 +21,15 @@ namespace RZTask.Agent.Services
             ServerUrl = grpcServer.ServerUrl;
         }
 
-        public async Task<Response> RegisterAsync(string agentId, string grpcAddress, string appName, byte[] keyData, byte[] certData)
+        public async Task<Response> RegisterAsync(string agentId, string grpcAddress, string appName, byte[] privateKey, byte[] certificate)
         {
             var request = new AgentRegistrationRequest
             {
                 AgentId = agentId,
                 GrpcAddress = grpcAddress,
                 AppName = appName,
-                KeyData = ByteString.CopyFrom(keyData),
-                CertData = ByteString.CopyFrom(certData)
+                PrivateKey = ByteString.CopyFrom(privateKey),
+                Certificate = ByteString.CopyFrom(certificate)
             };
 
             var response = await _client.RegisterAgentAsync(request);

@@ -19,8 +19,8 @@ message AgentRegistrationRequest {
 	string agentId = 1;		// Agent 的唯一标识
 	string grpcAddress = 2;	// Agent 的 gRPC 地址 
 	string appName = 3;   // 应用名
-	bytes keyData = 4;	// 证书key内容
-	bytes certData = 5;	// 证书内容
+	bytes PrivateKey = 4;	// 证书key内容
+	bytes Certificate = 5;	// 证书内容
 }
 
 message AgentHeartbeatRequest {

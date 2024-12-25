@@ -22,10 +22,32 @@ namespace RZTask.Common.Utils
             var httpHandler = new HttpClientHandler();
             httpHandler.ClientCertificates.Add(certificate);
 
-            //httpHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
-            //{
-            //    return sslPolicyErrors == System.Net.Security.SslPolicyErrors.None || cert!.Equals(certificate);
-            //};
+            httpHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
+            {
+                return sslPolicyErrors == System.Net.Security.SslPolicyErrors.None || cert!.Equals(certificate);
+            };
+
+            var channel = GrpcChannel.ForAddress(url, new GrpcChannelOptions
+            {
+                HttpClient = new HttpClient(httpHandler),
+            });
+
+            return channel;
+        }
+
+        public static GrpcChannel CreateChannel(string url, X509Certificate2 certificate)
+        {
+            var httpHandler = new HttpClientHandler();
+            httpHandler.ClientCertificates.Add(certificate);
+
+            httpHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
+            {
+                if (sslPolicyErrors != System.Net.Security.SslPolicyErrors.None)
+                {
+                    return false;
+                }
+                return true;
+            };
 
             var channel = GrpcChannel.ForAddress(url, new GrpcChannelOptions
             {

@@ -37,6 +37,8 @@ public class Startup
             //var grpcConfig = Configuration.GetSection("Kestrel:Endpoints:Grpc").Value;
             // 注册 TaskService 服务
             endpoints.MapGrpcService<ServerServiceImpl>();
+
+            endpoints.MapControllers();
         });
     }
 }

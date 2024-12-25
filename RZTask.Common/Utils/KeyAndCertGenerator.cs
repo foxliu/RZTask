@@ -25,8 +25,8 @@ namespace RZTask.Common.Utils
         {
             if (File.Exists(_keyFilePath) && File.Exists(_certFilePath))
             {
-                certificateInfo.KeyData = File.ReadAllBytes(_keyFilePath);
-                certificateInfo.CertData = File.ReadAllBytes(_certFilePath);
+                certificateInfo.PrivateKey = File.ReadAllBytes(_keyFilePath);
+                certificateInfo.Certificate = File.ReadAllBytes(_certFilePath);
                 return;
             }
 
@@ -51,8 +51,8 @@ namespace RZTask.Common.Utils
                 var privateKey = rsa.ExportRSAPrivateKey();
                 var privateCert = cert.Export(X509ContentType.Cert);
 
-                certificateInfo.KeyData = privateKey;
-                certificateInfo.CertData = privateCert;
+                certificateInfo.PrivateKey = privateKey;
+                certificateInfo.Certificate = privateCert;
 
                 File.WriteAllBytes(_keyFilePath, privateKey);
 

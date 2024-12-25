@@ -15,7 +15,10 @@ service AgentService {
 message TaskRequest {
 	string taskId = 1;		// 任务ID
 	string taskType = 2;	// 任务类型
-	string taskData = 3;	// 任务数据 
+	string dllFileName = 3;	// 反射调用的文件名
+	string functionType = 4; // 反射调用使用的命名空间.类名
+	string functionName = 5; // 调用的函数名，如果是shell则是执行命令的绝对路径
+	string functionParmas = 6; // 函数调用的参数，shell的参数以空格为分割符，其他的参数以逗号为分割符
 }
 
 // 任务响应
