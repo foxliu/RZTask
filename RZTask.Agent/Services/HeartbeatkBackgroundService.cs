@@ -13,7 +13,7 @@ namespace RZTask.Agent.Services
         private readonly LocalInfo _localInfo;
         private CertificateInfo _certificateInfo;
 
-        public HeartbeatkBackgroundService(Serilog.ILogger logger, IConfiguration configuration, 
+        public HeartbeatkBackgroundService(Serilog.ILogger logger, IConfiguration configuration,
             AgentRegistrar agentRegistrar, LocalInfo localInfo, CertificateInfo certificateInfo)
         {
             _configuration = configuration;
@@ -26,18 +26,13 @@ namespace RZTask.Agent.Services
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.Information("Start initialization key and certificate file ...");
-            try
+            var result = await KeyFileInitializeServiceAsync();
+
+            while (!stoppingToken.IsCancellationRequested && !result)
             {
-                KeyFileInitializeServiceAsync().GetAwaiter().GetResult();
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"key and certificate init failed: {ex.Message}");
-                Console.WriteLine(ex.ToString());
-                if (ex.StackTrace != null)
-                {
-                    _logger.Error(ex.StackTrace);
-                }
+                await Task.Delay(10000);
+
+                result = await KeyFileInitializeServiceAsync();
             }
             while (!stoppingToken.IsCancellationRequested)
             {
