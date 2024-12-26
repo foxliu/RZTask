@@ -10,5 +10,6 @@ namespace RZTask.Common.Structs
     {
         public byte[] Certificate { get; set; }
         public byte[] PrivateKey { get; set; }
+        public string Thumbprint { get; set; }
     }
 }

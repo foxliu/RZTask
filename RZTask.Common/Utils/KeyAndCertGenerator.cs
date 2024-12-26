@@ -27,6 +27,7 @@ namespace RZTask.Common.Utils
             {
                 certificateInfo.PrivateKey = File.ReadAllBytes(_keyFilePath);
                 certificateInfo.Certificate = File.ReadAllBytes(_certFilePath);
+                SaveThumprint(_keyFilePath, new X509Certificate2(certificateInfo.Certificate).Thumbprint);
                 return;
             }
 
@@ -54,11 +55,18 @@ namespace RZTask.Common.Utils
                 certificateInfo.PrivateKey = privateKey;
                 certificateInfo.Certificate = privateCert;
 
+                SaveThumprint(_keyFilePath, cert.Thumbprint);
+
                 File.WriteAllBytes(_keyFilePath, privateKey);
 
                 File.WriteAllBytes(_certFilePath, privateCert);
             }
+        }
 
+        private void SaveThumprint(string keyPath, string thumprint)
+        {
+            var thumprintPath = Path.Combine(Path.GetDirectoryName(_keyFilePath) ?? System.AppDomain.CurrentDomain.BaseDirectory, "thumbprint");
+            File.WriteAllText(thumprintPath, thumprint);
         }
     }
 }

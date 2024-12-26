@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Tasks\**" />
+    <Content Remove="Tasks\**" />
+    <EmbeddedResource Remove="Tasks\**" />
+    <None Remove="Tasks\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.67.0" />
     <PackageReference Include="Serilog" Version="4.1.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
@@ -17,10 +24,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RZTask.Common\RZTask.Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Tasks\" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RZTask.Common.Protos;
+using RZTask.Common.Utils;
 using RZTask.Server.Data;
 using System.Security.Cryptography.X509Certificates;
 
@@ -24,7 +26,7 @@ namespace RZTask.Server.Controllers
 
             var agentInfo = _appDbContext.Agents.FirstOrDefault(a => a.AgentId == agentId);
 
-            if (agentInfo != null)
+            if (agentInfo == null)
             {
                 return NotFound(agentId);
             }
@@ -32,7 +34,22 @@ namespace RZTask.Server.Controllers
             var clientCert = new X509Certificate2(agentInfo.Certificate);
             var privateKey = Convert.ToBase64String(agentInfo.PrivateKey);
 
-            return Ok(agentInfo);
+            var grpcChannel = GrpcClientService.CreateChannel(agentInfo.GrpcAddress, clientCert);
+            var client = new AgentService.AgentServiceClient(grpcChannel);
+
+            var taskRequest = new TaskRequest
+            {
+                TaskId = agentId,
+                TaskType = "shell",
+                FunctionType = "",
+                DllFileName = "test.dll",
+                FunctionName = "ipconfig",
+                FunctionParmas = "/all"
+            };
+
+            var response = client.ExecuteTask(taskRequest);
+
+            return Ok(response);
         }
     }
 }

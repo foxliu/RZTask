@@ -89,32 +89,55 @@ namespace RZTask.Agent.Services
             }
         }
 
-        private async Task KeyFileInitializeServiceAsync()
+        private async Task<bool> KeyFileInitializeServiceAsync()
         {
-            var _keyFilePath = _configuration["Kestrel:Endpoints:Grpc:Certificate:KeyPath"];
-            var _certFilePath = _configuration["Kestrel:Endpoints:Grpc:Certificate:Store"];
-            
-            var generator = new KeyAndCertGenerator(_keyFilePath, _certFilePath);
-            generator.GenerateKeyAndCert(ref _certificateInfo);
-
-            _logger.Information($"key and certificate inited, cert file path: {_certFilePath}");
-
-            var localIp = _localInfo.GetIpByInterfaceName("以太网") ?? "255.255.255.255";
-
             // Generate agent grpc url
-            var grpcUrl = _configuration["Kestrel:Endpoints:Grpc:Url"]!;
-
-            var appName = _localInfo.GetAppName("test");
-
-            var response = await _agentRegistrar.RegisterAsync(localIp, grpcUrl, appName, _certificateInfo.PrivateKey, _certificateInfo.Certificate);
-
-            if (response.Code == 200)
+            var listenUrl = _configuration["Kestrel:Endpoints:Grpc:Url"]!;
+            try
             {
-                Console.WriteLine("Init Cert File And Registrat Succfull");
+                var _keyFilePath = _configuration["Kestrel:Endpoints:Grpc:Certificate:KeyPath"];
+                var _certFilePath = _configuration["Kestrel:Endpoints:Grpc:Certificate:Store"];
+
+                var generator = new KeyAndCertGenerator(_keyFilePath, _certFilePath);
+                generator.GenerateKeyAndCert(ref _certificateInfo);
+
+                _logger.Information($"key and certificate inited, cert file path: {_certFilePath}");
+
+                var localIp = _localInfo.GetIpByInterfaceName("以太网") ?? "255.255.255.255";
+
+                var originalUri = new Uri(listenUrl);
+
+                UriBuilder uriBuilder = new UriBuilder(originalUri)
+                {
+                    Host = localIp,
+                };
+
+                var grpcUri = uriBuilder.Uri;
+
+                var appName = _localInfo.GetAppName("test");
+
+                var response = await _agentRegistrar.RegisterAsync(localIp, grpcUri.ToString(), appName, _certificateInfo.PrivateKey, _certificateInfo.Certificate);
+
+                if (response.Code == 200)
+                {
+                    Console.WriteLine("Init Cert File And Registrat Succfull");
+                    return true;
+                }
+                else
+                {
+                    Console.WriteLine($"Init Cert File And Registrat Failed: {response.Message}");
+                    return false;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"Init Cert File And Registrat Failed: {response.Message}");
+                _logger.Error($"Key and certificate init failed: {ex.Message}");
+                Console.WriteLine($"Registe agent to server error: {ex.Message}");
+                if (ex.StackTrace != null)
+                {
+                    _logger.Error(ex.StackTrace);
+                }
+                return false;
             }
         }
     }

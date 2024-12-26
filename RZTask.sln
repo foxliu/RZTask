@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RZTask.Server", "RZTask.Ser
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RZTask.Agent", "RZTask.Agent\RZTask.Agent.csproj", "{EA5C1095-A68C-4FF6-96F5-BF491222E210}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HealthCheck", "..\HealthCheck\HealthCheck\HealthCheck.csproj", "{C4F18315-AEE7-49F7-AB72-B29D681AABA9}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,14 +41,6 @@ Global
 		{EA5C1095-A68C-4FF6-96F5-BF491222E210}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EA5C1095-A68C-4FF6-96F5-BF491222E210}.Release|ARM64.ActiveCfg = Release|Any CPU
 		{EA5C1095-A68C-4FF6-96F5-BF491222E210}.Release|ARM64.Build.0 = Release|Any CPU
-		{C4F18315-AEE7-49F7-AB72-B29D681AABA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C4F18315-AEE7-49F7-AB72-B29D681AABA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C4F18315-AEE7-49F7-AB72-B29D681AABA9}.Debug|ARM64.ActiveCfg = Debug|ARM64
-		{C4F18315-AEE7-49F7-AB72-B29D681AABA9}.Debug|ARM64.Build.0 = Debug|ARM64
-		{C4F18315-AEE7-49F7-AB72-B29D681AABA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C4F18315-AEE7-49F7-AB72-B29D681AABA9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C4F18315-AEE7-49F7-AB72-B29D681AABA9}.Release|ARM64.ActiveCfg = Release|ARM64
-		{C4F18315-AEE7-49F7-AB72-B29D681AABA9}.Release|ARM64.Build.0 = Release|ARM64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

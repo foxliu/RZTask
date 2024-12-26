@@ -35,7 +35,10 @@ namespace RZTask.Agent.Services
                 _logger.Error($"Init grpc channel error: {ex.Message}");
                 _logger.Error(ex.StackTrace ?? "");
                 Console.Error.WriteLine(ex.Message);
-                Console.Error.WriteLine(ex.StackTrace);
+                if (ex.StackTrace != null)
+                {
+                    _logger.Error(ex.StackTrace);
+                }
                 Environment.Exit(1);
                 throw;
             }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RZTask.Server.Controllers;
+using RZTask.Common.Utils;
 using RZTask.Server.Data;
 using Serilog;
 
@@ -15,6 +16,7 @@ public class Startup
     {
         var connectionString = Configuration.GetConnectionString("DefaultConnection") ?? "";
 
+        services.AddControllers();
         services.AddGrpc();  // 添加 gRPC 服务
         services.AddDbContext<AppDbContext>(option => option.UseMySQL(connectionString));
         services.AddTransient<AgentConnect>();
