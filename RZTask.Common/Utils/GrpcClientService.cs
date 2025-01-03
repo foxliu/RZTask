@@ -24,7 +24,9 @@ namespace RZTask.Common.Utils
 
             httpHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
             {
-                return sslPolicyErrors == System.Net.Security.SslPolicyErrors.None || cert!.Equals(certificate);
+                var store = CertificateStore.Instance;
+
+                return sslPolicyErrors == System.Net.Security.SslPolicyErrors.None || cert!.Thumbprint.Equals(store.Thumbprint, StringComparison.OrdinalIgnoreCase);
             };
 
             var channel = GrpcChannel.ForAddress(url, new GrpcChannelOptions
@@ -42,11 +44,21 @@ namespace RZTask.Common.Utils
 
             httpHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
             {
-                if (sslPolicyErrors != System.Net.Security.SslPolicyErrors.None)
+                Console.WriteLine($"SSL Policy Errors: {sslPolicyErrors}");
+                //if (sslPolicyErrors == System.Net.Security.SslPolicyErrors.None)
+                //{
+                //    Console.WriteLine("No SSL Policy Errors.");
+                //    return true;
+                //}
+
+                Console.WriteLine($"Comparing Thumbprint: Server: {cert.Thumbprint} Request: {certificate.Thumbprint}");
+                if (cert.Thumbprint.Equals(certificate.Thumbprint, StringComparison.OrdinalIgnoreCase))
                 {
-                    return false;
+                    Console.WriteLine("Thumbprint matched.");
+                    return true;
                 }
-                return true;
+                Console.WriteLine("Thumbprint did not match.");
+                return false;
             };
 
             var channel = GrpcChannel.ForAddress(url, new GrpcChannelOptions

@@ -24,8 +24,8 @@ namespace RZTask.Server.Controllers
                     AgentId = request.AgentId,
                     GrpcAddress = request.GrpcAddress,
                     AppName = request.AppName,
-                    PrivateKey = request.PrivateKey.ToByteArray(),
-                    Certificate = request.Certificate.ToByteArray(),
+                    PrivateKey = request.PrivateKey,
+                    Certificate = request.Certificate,
                     LastHeartbeat = DateTime.Now,
                     CreatedAt = DateTime.Now,
                     CreatedBy = "remote api",
@@ -36,8 +36,8 @@ namespace RZTask.Server.Controllers
             {
                 agentInfo.GrpcAddress = request.GrpcAddress;
                 agentInfo.AppName = request.AppName;
-                agentInfo.PrivateKey = request.PrivateKey.ToByteArray();
-                agentInfo.Certificate = request.Certificate.ToByteArray();
+                agentInfo.PrivateKey = request.PrivateKey;
+                agentInfo.Certificate = request.Certificate;
                 agentInfo.LastHeartbeat = DateTime.Now;
                 agentInfo.UpdatedBy = "remote api";
                 agentInfo.UpdatedAt = DateTime.Now;

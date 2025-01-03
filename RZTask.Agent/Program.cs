@@ -4,6 +4,9 @@ using RZTask.Common.Protos;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Serilog;
+using System;
+using System.Net.Security;
+using RZTask.Common.Utils;
 
 namespace RZTask.Agent
 {
@@ -11,6 +14,18 @@ namespace RZTask.Agent
     {
         public static void Main(string[] args)
         {
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+            {
+                Exception exception = (Exception)e.ExceptionObject;
+                Console.WriteLine($"Unhandled exception: {exception.Message}");
+            };
+
+            TaskScheduler.UnobservedTaskException += (sender, e) =>
+            {
+                Console.WriteLine($"Unhandled exception: {e.Exception.Message}");
+                e.SetObserved();
+            };
+
             CreateHostBuilder(args).Build().Run();
         }
 
@@ -29,21 +44,9 @@ namespace RZTask.Agent
             })
             .ConfigureWebHostDefaults(webBuilder =>
             {
-                webBuilder.UseKestrel((context, options) =>
+                webBuilder.UseKestrel((context, option) =>
                 {
-                    options.ConfigureHttpsDefaults(httpsOptions =>
-                    {
-                        httpsOptions.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
-
-                        httpsOptions.ClientCertificateValidation = (cert, chain, sslPoliceErrors) =>
-                        {
-                            var keyPath = context.Configuration["Kestrel:Endpoints:Grpc:Certificate:KeyPath"];
-                            var thumbprintPath = Path.Combine(keyPath ?? System.AppDomain.CurrentDomain.BaseDirectory, "thumbprint");
-                            var thumbprint = File.ReadAllText(thumbprintPath);
-
-                            return cert.Thumbprint.Equals(thumbprint, StringComparison.OrdinalIgnoreCase);
-                        };
-                    });
+                    option.Configure(context.Configuration.GetSection("Kestrel"), reloadOnChange: true);
                 });
 
                 webBuilder.UseStartup<Startup>();

@@ -31,25 +31,32 @@ namespace RZTask.Server.Controllers
                 return NotFound(agentId);
             }
 
-            var clientCert = new X509Certificate2(agentInfo.Certificate);
-            var privateKey = Convert.ToBase64String(agentInfo.PrivateKey);
-
-            var grpcChannel = GrpcClientService.CreateChannel(agentInfo.GrpcAddress, clientCert);
-            var client = new AgentService.AgentServiceClient(grpcChannel);
-
-            var taskRequest = new TaskRequest
+            try
             {
-                TaskId = agentId,
-                TaskType = "shell",
-                FunctionType = "",
-                DllFileName = "test.dll",
-                FunctionName = "ipconfig",
-                FunctionParmas = "/all"
-            };
+                var clientCert = new X509Certificate2(System.Text.Encoding.UTF8.GetBytes(agentInfo.Certificate));
+                var privateKey = agentInfo.PrivateKey;
 
-            var response = client.ExecuteTask(taskRequest);
+                var grpcChannel = GrpcClientService.CreateChannel(agentInfo.GrpcAddress, clientCert);
+                var client = new AgentService.AgentServiceClient(grpcChannel);
 
-            return Ok(response);
+                var taskRequest = new TaskRequest
+                {
+                    TaskId = agentId,
+                    TaskType = "shell",
+                    FunctionType = "",
+                    DllFileName = "test.dll",
+                    FunctionName = "ipconfig",
+                    FunctionParmas = "/all"
+                };
+
+                var response = client.ExecuteTask(taskRequest);
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

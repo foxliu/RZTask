@@ -20,10 +20,10 @@ namespace RZTask.Server.Models
         public string AppName { get; set; }
 
         [Required, Column("private_key"), Comment("证书key内容")]
-        public byte[] PrivateKey { get; set; }
+        public string PrivateKey { get; set; }
 
         [Required, Column("certificate"), Comment("证书内容")]
-        public byte[] Certificate { get; set; }
+        public string Certificate { get; set; }
 
         [Required, Column("last_heartbeat"), Comment("上一次心跳时间")]
         public DateTime LastHeartbeat { get; set; }

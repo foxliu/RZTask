@@ -11,16 +11,14 @@ namespace RZTask.Agent.Services
         private readonly AgentRegistrar _agentRegistrar;
         private readonly Timer? _timer = null;
         private readonly LocalInfo _localInfo;
-        private CertificateInfo _certificateInfo;
 
         public HeartbeatkBackgroundService(Serilog.ILogger logger, IConfiguration configuration,
-            AgentRegistrar agentRegistrar, LocalInfo localInfo, CertificateInfo certificateInfo)
+            AgentRegistrar agentRegistrar, LocalInfo localInfo)
         {
             _configuration = configuration;
             _logger = logger;
             _agentRegistrar = agentRegistrar;
             _localInfo = localInfo;
-            _certificateInfo = certificateInfo;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -67,7 +65,9 @@ namespace RZTask.Agent.Services
                         _logger.Information($"{response.Message}");
                         var appName = _localInfo.GetAppName("test");
 
-                        await _agentRegistrar.RegisterAsync(localIp, grpcUrl, appName, _certificateInfo.PrivateKey, _certificateInfo.Certificate);
+                        var store = CertificateStore.Instance;
+
+                        await _agentRegistrar.RegisterAsync(localIp, grpcUrl, appName, store.PrivateKey!, store.CertificateByte!);
                         return;
                     default:
                         _logger.Error($"Send heartbeat to server: {_agentRegistrar.ServerUrl} failed: {response.Code}:{response.Message}");
@@ -91,10 +91,10 @@ namespace RZTask.Agent.Services
             try
             {
                 var _keyFilePath = _configuration["Kestrel:Endpoints:Grpc:Certificate:KeyPath"];
-                var _certFilePath = _configuration["Kestrel:Endpoints:Grpc:Certificate:Store"];
+                var _certFilePath = _configuration["Kestrel:Endpoints:Grpc:Certificate:Path"];
 
                 var generator = new KeyAndCertGenerator(_keyFilePath, _certFilePath);
-                generator.GenerateKeyAndCert(ref _certificateInfo);
+                generator.GenerateKeyAndCert();
 
                 _logger.Information($"key and certificate inited, cert file path: {_certFilePath}");
 
@@ -111,7 +111,9 @@ namespace RZTask.Agent.Services
 
                 var appName = _localInfo.GetAppName("test");
 
-                var response = await _agentRegistrar.RegisterAsync(localIp, grpcUri.ToString(), appName, _certificateInfo.PrivateKey, _certificateInfo.Certificate);
+                var store = CertificateStore.Instance;
+
+                var response = await _agentRegistrar.RegisterAsync(localIp, grpcUri.ToString(), appName, store.PrivateKey!, store.CertificateByte!);
 
                 if (response.Code == 200)
                 {

@@ -1,7 +1,12 @@
 using Microsoft.EntityFrameworkCore;
+using RZTask.Common.Utils;
 using RZTask.Server.Data;
 using Serilog;
+using System;
 using System.Configuration;
+using System.Net.Security;
+using System.Runtime.ConstrainedExecution;
+using System.Security.Claims;
 
 namespace RZTask.Server
 {
@@ -9,6 +14,18 @@ namespace RZTask.Server
     {
         public static void Main(string[] args)
         {
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+            {
+                Exception exception = (Exception)e.ExceptionObject;
+                Console.WriteLine($"Unhandled exception: {exception.Message}");
+            };
+
+            TaskScheduler.UnobservedTaskException += (sender, e) =>
+            {
+                Console.WriteLine($"Unhandled exception: {e.Exception.Message}");
+                e.SetObserved();
+            };
+
             CreateHostBuilder(args).Build().Run();
         }
 
@@ -30,6 +47,7 @@ namespace RZTask.Server
                 webBuilder.UseKestrel((context, option) =>
                 {
                     option.Configure(context.Configuration.GetSection("Kestrel"), reloadOnChange: true);
+                    
                 });
 
                 webBuilder.UseStartup<Startup>();

@@ -13,18 +13,26 @@ namespace RZTask.Agent.Services
             _logger = logger;
         }
 
-        public override async Task<TaskResponse> ExecuteTask(TaskRequest request, IServerStreamWriter<TaskResponse> streamWriter, ServerCallContext context)
+        public override async Task ExecuteTask(TaskRequest request, IServerStreamWriter<TaskResponse> streamWriter, ServerCallContext context)
         {
             _logger.Information($"Executing task {request.TaskId}...");
 
-            await Task.Delay(2000);
+            await streamWriter.WriteAsync(new TaskResponse
+            {
+                TaskId = request.TaskId,
+                Status = TaskResponse.Types.TaskStatus.InProgress,
+                Result = $"Task {request.TaskId} executing"
+            });
 
-            return new TaskResponse
+            await Task.Delay(1000);
+
+            await streamWriter.WriteAsync(new TaskResponse
             {
                 TaskId = request.TaskId,
                 Status = TaskResponse.Types.TaskStatus.Completed,
                 Result = $"Task {request.TaskId} executed successfully"
-            };
+            });
+            return;
         }
 
     }
