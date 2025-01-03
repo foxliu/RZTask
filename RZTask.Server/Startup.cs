@@ -3,6 +3,7 @@ using RZTask.Server.Controllers;
 using RZTask.Common.Utils;
 using RZTask.Server.Data;
 using Serilog;
+using RZTask.Server.Services;
 
 public class Startup
 {
@@ -16,6 +17,7 @@ public class Startup
     {
         var connectionString = Configuration.GetConnectionString("DefaultConnection") ?? "";
 
+        services.AddHostedService<InitializeBackgroundService>();
         services.AddControllers();
         services.AddGrpc();  // 添加 gRPC 服务
         services.AddDbContext<AppDbContext>(option => option.UseMySQL(connectionString));

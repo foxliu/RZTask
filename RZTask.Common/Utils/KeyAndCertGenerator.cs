@@ -31,8 +31,6 @@ namespace RZTask.Common.Utils
                 var store = CertificateStore.Instance;
                 store.Certificate = new X509Certificate2(certificate);
                 store.PrivateKey = privateKey;
-
-                SaveThumprint(_keyFilePath, store.Thumbprint!);
                 return;
             }
 
@@ -83,15 +81,8 @@ namespace RZTask.Common.Utils
                 var store = CertificateStore.Instance;
                 store.Certificate = cert;
                 store.PrivateKey = rsa.ExportRSAPrivateKeyPem();
-
-                SaveThumprint(_keyFilePath, cert.Thumbprint);   
             }
         }
 
-        private void SaveThumprint(string keyPath, string thumprint)
-        {
-            var thumprintPath = Path.Combine(Path.GetDirectoryName(_keyFilePath) ?? System.AppDomain.CurrentDomain.BaseDirectory, "thumbprint");
-            File.WriteAllText(thumprintPath, thumprint);
-        }
     }
 }

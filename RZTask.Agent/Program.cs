@@ -47,6 +47,17 @@ namespace RZTask.Agent
                 webBuilder.UseKestrel((context, option) =>
                 {
                     option.Configure(context.Configuration.GetSection("Kestrel"), reloadOnChange: true);
+
+                    option.ConfigureHttpsDefaults(httpsOptions =>
+                    {
+                        httpsOptions.ClientCertificateMode = ClientCertificateMode.AllowCertificate;
+
+                        httpsOptions.ClientCertificateValidation = (cert, chain, sslPolicyErrors) =>
+                        {
+                            var store = CertificateStore.Instance;
+                            return cert.Thumbprint.Equals(store.Thumbprint, StringComparison.OrdinalIgnoreCase);
+                        };
+                    });
                 });
 
                 webBuilder.UseStartup<Startup>();
