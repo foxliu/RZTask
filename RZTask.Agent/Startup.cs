@@ -1,4 +1,6 @@
-﻿using RZTask.Agent.Services;
+﻿using RZTask.Agent.Api;
+using RZTask.Agent.Client;
+using RZTask.Agent.Services;
 using RZTask.Common.Structs;
 using RZTask.Common.Utils;
 using Serilog;
@@ -21,6 +23,8 @@ namespace RZTask.Agent
             services.AddTransient<GrpcServerConnect>();
             services.AddSingleton<LocalInfo>();
             services.AddHostedService<HeartbeatkBackgroundService>();
+
+            services.AddTransient<ExecuteShellCommand>();
 
             services.AddGrpc();
         }

@@ -55,7 +55,7 @@ namespace RZTask.Server
 
                         httpsOptions.ClientCertificateValidation = (cert, chain, sslPolicyErrors) =>
                         { 
-                            var store = CertificateStore.Instance;
+                            var store = ApplicationStore.Instance;
                             return cert.Thumbprint.Equals(store.Thumbprint, StringComparison.OrdinalIgnoreCase);
                         };
                     });

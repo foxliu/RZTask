@@ -3,7 +3,7 @@ using Grpc.Net.Client;
 using RZTask.Common.Protos;
 using ILogger = Serilog.ILogger;
 
-namespace RZTask.Agent.Services
+namespace RZTask.Agent.Api
 {
     public class AgentRegistrar
     {
@@ -21,14 +21,13 @@ namespace RZTask.Agent.Services
             ServerUrl = grpcServer.ServerUrl;
         }
 
-        public async Task<Response> RegisterAsync(string agentId, string grpcAddress, string appName, string privateKey, string certificate)
+        public async Task<Response> RegisterAsync(string agentId, string grpcAddress, string appName, string certificate)
         {
             var request = new AgentRegistrationRequest
             {
                 AgentId = agentId,
                 GrpcAddress = grpcAddress,
                 AppName = appName,
-                PrivateKey = privateKey,
                 Certificate = certificate
             };
 

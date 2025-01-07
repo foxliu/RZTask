@@ -1,6 +1,6 @@
 ﻿using RZTask.Common.Utils;
 
-namespace RZTask.Server.Services
+namespace RZTask.Server.Api
 {
     public class InitializeBackgroundService : IHostedService
     {

@@ -24,7 +24,7 @@ namespace RZTask.Common.Utils
 
             httpHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
             {
-                var store = CertificateStore.Instance;
+                var store = ApplicationStore.Instance;
 
                 return sslPolicyErrors == System.Net.Security.SslPolicyErrors.None || cert!.Thumbprint.Equals(store.Thumbprint, StringComparison.OrdinalIgnoreCase);
             };

@@ -27,4 +27,8 @@
     <ProjectReference Include="..\RZTask.Common\RZTask.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Client\" />
+  </ItemGroup>
+
 </Project>

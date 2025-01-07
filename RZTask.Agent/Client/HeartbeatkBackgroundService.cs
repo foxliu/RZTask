@@ -1,15 +1,15 @@
-﻿using RZTask.Common.Protos;
+﻿using RZTask.Agent.Api;
+using RZTask.Common.Protos;
 using RZTask.Common.Structs;
 using RZTask.Common.Utils;
 
-namespace RZTask.Agent.Services
+namespace RZTask.Agent.Client
 {
     public class HeartbeatkBackgroundService : BackgroundService
     {
         private readonly Serilog.ILogger _logger;
         private readonly IConfiguration _configuration;
         private readonly AgentRegistrar _agentRegistrar;
-        private readonly Timer? _timer = null;
         private readonly LocalInfo _localInfo;
 
         public HeartbeatkBackgroundService(Serilog.ILogger logger, IConfiguration configuration,
@@ -65,9 +65,9 @@ namespace RZTask.Agent.Services
                         _logger.Information($"{response.Message}");
                         var appName = _localInfo.GetAppName("test");
 
-                        var store = CertificateStore.Instance;
+                        var store = ApplicationStore.Instance;
 
-                        await _agentRegistrar.RegisterAsync(localIp, grpcUrl, appName, store.PrivateKey!, store.CertificateByte!);
+                        await _agentRegistrar.RegisterAsync(localIp, grpcUrl, appName, store.CertificateByte!);
                         return;
                     default:
                         _logger.Error($"Send heartbeat to server: {_agentRegistrar.ServerUrl} failed: {response.Code}:{response.Message}");
@@ -111,9 +111,9 @@ namespace RZTask.Agent.Services
 
                 var appName = _localInfo.GetAppName("test");
 
-                var store = CertificateStore.Instance;
+                var store = ApplicationStore.Instance;
 
-                var response = await _agentRegistrar.RegisterAsync(localIp, grpcUri.ToString(), appName, store.PrivateKey!, store.CertificateByte!);
+                var response = await _agentRegistrar.RegisterAsync(localIp, grpcUri.ToString(), appName, store.CertificateByte!);
 
                 if (response.Code == 200)
                 {

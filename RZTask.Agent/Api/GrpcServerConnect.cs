@@ -4,13 +4,13 @@ using RZTask.Common.Utils;
 using System.Security.Cryptography.X509Certificates;
 using ILogger = Serilog.ILogger;
 
-namespace RZTask.Agent.Services
+namespace RZTask.Agent.Api
 {
     public class GrpcServerConnect
     {
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
-        public readonly String ServerUrl;
+        public readonly string ServerUrl;
 
         public GrpcServerConnect(ILogger logger, IConfiguration configuration)
         {
@@ -26,8 +26,7 @@ namespace RZTask.Agent.Services
             {
                 var url = serverOptions["Url"]!;
                 var configCertPath = serverOptions["Certificate:Path"]!;
-                var certPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, configCertPath);
-                Console.WriteLine($"===================> cert path: {certPath}");
+                var certPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, configCertPath);
 
                 var channel = GrpcClientService.CreateChannel(url, new X509Certificate2(certPath));
                 return new ServerService.ServerServiceClient(channel);

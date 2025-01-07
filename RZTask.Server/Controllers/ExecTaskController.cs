@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Grpc.Core;
+using Microsoft.AspNetCore.Mvc;
 using RZTask.Common.Protos;
 using RZTask.Common.Utils;
 using RZTask.Server.Data;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 namespace RZTask.Server.Controllers
 {
@@ -20,7 +22,7 @@ namespace RZTask.Server.Controllers
         }
 
         [HttpGet]
-        public IActionResult ExecTask()
+        public async Task<IActionResult> ExecTask()
         {
             var agentId = "192.168.136.250";
 
@@ -34,7 +36,6 @@ namespace RZTask.Server.Controllers
             try
             {
                 var clientCert = new X509Certificate2(System.Text.Encoding.UTF8.GetBytes(agentInfo.Certificate));
-                var privateKey = agentInfo.PrivateKey;
 
                 var grpcChannel = GrpcClientService.CreateChannel(agentInfo.GrpcAddress, clientCert);
                 var client = new AgentService.AgentServiceClient(grpcChannel);
@@ -42,16 +43,24 @@ namespace RZTask.Server.Controllers
                 var taskRequest = new TaskRequest
                 {
                     TaskId = agentId,
-                    TaskType = "shell",
+                    Type = TaskRequest.Types.TaskType.Cmd,
                     FunctionType = "",
-                    DllFileName = "test.dll",
+                    FileName = "",
                     FunctionName = "ipconfig",
                     FunctionParmas = "/all"
                 };
 
-                var response = client.ExecuteTask(taskRequest);
+                using var call = client.ExecuteTask(taskRequest);
 
-                return Ok(response);
+                var result = new StringBuilder();
+
+                await foreach (var response in call.ResponseStream.ReadAllAsync())
+                {
+                    result.AppendLine(response.Result.ToString());
+                    //return Ok(response);
+                }
+
+                return Ok(result.ToString());
             }
             catch (Exception ex)
             {

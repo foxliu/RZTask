@@ -28,7 +28,7 @@ namespace RZTask.Common.Utils
                 var privateKey = File.ReadAllText(_keyFilePath);
                 var certificate = File.ReadAllBytes(_certFilePath);
 
-                var store = CertificateStore.Instance;
+                var store = ApplicationStore.Instance;
                 store.Certificate = new X509Certificate2(certificate);
                 store.PrivateKey = privateKey;
                 return;
@@ -78,7 +78,7 @@ namespace RZTask.Common.Utils
                 // 5. 导出私钥 （保存为 .key 文件）
                 File.WriteAllText(_keyFilePath, rsa.ExportRSAPrivateKeyPem());
 
-                var store = CertificateStore.Instance;
+                var store = ApplicationStore.Instance;
                 store.Certificate = cert;
                 store.PrivateKey = rsa.ExportRSAPrivateKeyPem();
             }

@@ -13,12 +13,19 @@ service AgentService {
 
 // 任务请求
 message TaskRequest {
-	string taskId = 1;		// 任务ID
-	string taskType = 2;	// 任务类型
-	string dllFileName = 3;	// 反射调用的文件名
-	string functionType = 4; // 反射调用使用的命名空间.类名
-	string functionName = 5; // 调用的函数名，如果是shell则是执行命令的绝对路径
-	string functionParmas = 6; // 函数调用的参数，shell的参数以空格为分割符，其他的参数以逗号为分割符
+	enum TaskType {
+		CMD = 0;   // windows下为cmd.exe, linux下为bash
+		SH = 1;
+		EXECUTABLE_FILE = 2;
+		DLL = 3;
+	}
+
+	string taskId = 1;			// 任务ID
+	TaskType type = 2;			// 任务类型
+	string fileName = 3;		// 从Server端传送给Agent端的文件，当type为EXECUTABLE_FILE和DLL时必需
+	string functionType = 4;	// 反射调用使用的命名空间.类名
+	string functionName = 5;	// CMD & SH: 执行命令的绝对路径或是在Path中的，EXECUTABLE_FILE: 与fileName相同，DLL：调用的函数
+	string functionParmas = 6;	// 函数调用的参数，shell的参数以空格为分割符，其他的参数以逗号为分割符
 }
 
 // 任务响应
@@ -33,4 +40,5 @@ message TaskResponse {
 	string taskId = 1;		// 任务ID
 	TaskStatus status = 2;		// 任务执行状态
 	string result = 3;		// 任务执行结果
+	int32 returnCode = 4;
 }

@@ -19,9 +19,6 @@ namespace RZTask.Server.Models
         [Required, Column("app_name"), Comment("Agent 应用名")]
         public string AppName { get; set; }
 
-        [Required, Column("private_key"), Comment("证书key内容")]
-        public string PrivateKey { get; set; }
-
         [Required, Column("certificate"), Comment("证书内容")]
         public string Certificate { get; set; }
 

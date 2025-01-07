@@ -1,7 +1,7 @@
 ﻿using RZTask.Server.Data;
 using RZTask.Server.Models;
 
-namespace RZTask.Server.Services
+namespace RZTask.Server.Api
 {
     public class AgentRegistry
     {
@@ -19,7 +19,7 @@ namespace RZTask.Server.Services
             var agent = _dbContext.Agents.FirstOrDefault(a => a.GrpcAddress == grpcAddress);
             if (agent == null)
             {
-                agent = new Models.Agents
+                agent = new Agents
                 {
                     GrpcAddress = grpcAddress,
                     AppName = appName,

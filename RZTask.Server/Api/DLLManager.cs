@@ -2,7 +2,7 @@
 using RZTask.Server.Models;
 using System.Security.Cryptography;
 
-namespace RZTask.Server.Services
+namespace RZTask.Server.Api
 {
     public class DLLManager
     {
