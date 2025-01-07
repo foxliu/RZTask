@@ -16,8 +16,9 @@ message TaskRequest {
 	enum TaskType {
 		CMD = 0;   // windows下为cmd.exe, linux下为bash
 		SH = 1;
-		EXECUTABLE_FILE = 2;
+		BINARY_FILE = 2;
 		DLL = 3;
+		SHELL_SCRIPT = 4;
 	}
 
 	string taskId = 1;			// 任务ID

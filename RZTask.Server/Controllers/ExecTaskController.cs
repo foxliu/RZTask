@@ -30,6 +30,7 @@ namespace RZTask.Server.Controllers
 
             if (agentInfo == null)
             {
+                _logger.Information($"Not Found AgentId: {agentId}");
                 return NotFound(agentId);
             }
 
@@ -64,6 +65,7 @@ namespace RZTask.Server.Controllers
             }
             catch (Exception ex)
             {
+                _logger.Error($"ExecTask error: {ex.Message}");
                 return BadRequest(ex.Message);
             }
         }
