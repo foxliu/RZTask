@@ -1,6 +1,4 @@
-﻿using Google.Protobuf;
-using Grpc.Net.Client;
-using RZTask.Common.Protos;
+﻿using RZTask.Common.Protos;
 using ILogger = Serilog.ILogger;
 
 namespace RZTask.Agent.Api

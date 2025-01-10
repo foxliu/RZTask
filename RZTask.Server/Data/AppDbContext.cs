@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RZTask.Server.Models;
-using MySql;
 
 namespace RZTask.Server.Data
 {

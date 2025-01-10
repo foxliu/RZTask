@@ -100,7 +100,7 @@ namespace RZTask.Common.Utils
         public string? GetBusiIp()
         {
             string ip = "127.0.0.1";
-            string? busiInterfaceName = Environment.GetEnvironmentVariable(configuration.GetSection("Agent:default_interface").Value);
+            string? busiInterfaceName = Environment.GetEnvironmentVariable(configuration.GetSection("Agent:default_interface").Value ?? "eth0");
             if (!string.IsNullOrEmpty(busiInterfaceName)) { ip = this.GetIpByInterfaceName(busiInterfaceName) ?? ""; }
 
             if (!string.IsNullOrEmpty(ip)) { return ip.ToString(); }

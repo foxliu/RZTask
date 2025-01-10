@@ -1,13 +1,5 @@
 ﻿using Grpc.Net.Client;
-using Microsoft.Extensions.Configuration;
-using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RZTask.Common.Utils
 {
@@ -44,21 +36,12 @@ namespace RZTask.Common.Utils
 
             httpHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
             {
-                Console.WriteLine($"SSL Policy Errors: {sslPolicyErrors}");
-                //if (sslPolicyErrors == System.Net.Security.SslPolicyErrors.None)
-                //{
-                //    Console.WriteLine("No SSL Policy Errors.");
-                //    return true;
-                //}
-
-                Console.WriteLine($"Comparing Thumbprint: Server: {cert.Thumbprint} Request: {certificate.Thumbprint}");
-                if (cert.Thumbprint.Equals(certificate.Thumbprint, StringComparison.OrdinalIgnoreCase))
+                if (sslPolicyErrors == System.Net.Security.SslPolicyErrors.None)
                 {
-                    Console.WriteLine("Thumbprint matched.");
                     return true;
                 }
-                Console.WriteLine("Thumbprint did not match.");
-                return false;
+
+                return cert != null && cert.Thumbprint.Equals(certificate.Thumbprint, StringComparison.OrdinalIgnoreCase);
             };
 
             var channel = GrpcChannel.ForAddress(url, new GrpcChannelOptions

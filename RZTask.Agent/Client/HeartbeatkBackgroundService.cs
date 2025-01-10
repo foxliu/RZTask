@@ -1,6 +1,5 @@
 ﻿using RZTask.Agent.Api;
 using RZTask.Common.Protos;
-using RZTask.Common.Structs;
 using RZTask.Common.Utils;
 
 namespace RZTask.Agent.Client

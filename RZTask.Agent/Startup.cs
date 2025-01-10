@@ -18,7 +18,7 @@ namespace RZTask.Agent
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<CertificateInfo>();
-            
+
             services.AddTransient<AgentRegistrar>();
             services.AddTransient<GrpcServerConnect>();
             services.AddSingleton<LocalInfo>();

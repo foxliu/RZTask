@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RZTask.Common.Structs
+﻿namespace RZTask.Common.Structs
 {
     public class HostInfoStruct
     {
-        public string AppName {  get; set; }
+        public string AppName { get; set; }
 
         public string HostName { get; set; }
 

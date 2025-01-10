@@ -2,7 +2,6 @@
 using RZTask.Common.Utils;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace RZTask.Agent.Api
@@ -30,7 +29,7 @@ namespace RZTask.Agent.Api
 
         public void InitializationCmd(TaskRequest request)
         {
-            string pattern =  @"['""].+?['""]|[^ ]+";
+            string pattern = @"['""].+?['""]|[^ ]+";
 
             switch (request.Type)
             {
@@ -133,8 +132,8 @@ namespace RZTask.Agent.Api
                 if (ex.StackTrace != null) { _logger.Error(ex.StackTrace); }
             }
             finally
-            { 
-                process.Dispose(); 
+            {
+                process.Dispose();
             }
         }
     }

@@ -1,13 +1,6 @@
 using Microsoft.AspNetCore.Server.Kestrel.Https;
-using Microsoft.EntityFrameworkCore;
 using RZTask.Common.Utils;
-using RZTask.Server.Data;
 using Serilog;
-using System;
-using System.Configuration;
-using System.Net.Security;
-using System.Runtime.ConstrainedExecution;
-using System.Security.Claims;
 
 namespace RZTask.Server
 {
@@ -54,7 +47,7 @@ namespace RZTask.Server
                         httpsOptions.ClientCertificateMode = ClientCertificateMode.AllowCertificate;
 
                         httpsOptions.ClientCertificateValidation = (cert, chain, sslPolicyErrors) =>
-                        { 
+                        {
                             var store = ApplicationStore.Instance;
                             return cert.Thumbprint.Equals(store.Thumbprint, StringComparison.OrdinalIgnoreCase);
                         };

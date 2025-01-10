@@ -1,5 +1,4 @@
-﻿using Grpc.Net.Client;
-using RZTask.Common.Protos;
+﻿using RZTask.Common.Protos;
 using RZTask.Common.Utils;
 using System.Security.Cryptography.X509Certificates;
 using ILogger = Serilog.ILogger;

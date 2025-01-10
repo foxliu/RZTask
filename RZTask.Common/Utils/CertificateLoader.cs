@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Security.Cryptography;
+﻿using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RZTask.Common.Utils
 {
@@ -16,7 +10,7 @@ namespace RZTask.Common.Utils
             var assembly = Assembly.GetExecutingAssembly();
 
             using var stream = assembly.GetManifestResourceStream(resourceName) ?? throw new FileNotFoundException("Certificate resource file not found", resourceName);
-            
+
             try
             {
                 return new X509Certificate2(ReadToEnd(stream), certificatePassword);

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Security.Cryptography.X509Certificates;
 
 namespace RZTask.Common.Utils
 {
@@ -18,7 +13,8 @@ namespace RZTask.Common.Utils
 
         private static readonly Lazy<ApplicationStore> _instance = new Lazy<ApplicationStore>(() => new ApplicationStore());
 
-        private ApplicationStore() {
+        private ApplicationStore()
+        {
             _dllDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "dll");
             if (!Directory.Exists(_dllDirectory))
             {

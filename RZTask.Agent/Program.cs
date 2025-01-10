@@ -1,12 +1,6 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
-using RZTask.Common.Protos;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Server.Kestrel.Https;
-using Serilog;
-using System;
-using System.Net.Security;
+﻿using Microsoft.AspNetCore.Server.Kestrel.Https;
 using RZTask.Common.Utils;
+using Serilog;
 
 namespace RZTask.Agent
 {

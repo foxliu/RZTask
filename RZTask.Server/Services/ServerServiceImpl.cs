@@ -44,7 +44,7 @@ public class ServerServiceImpl : ServerService.ServerServiceBase
     }
 
 
-    public override Task<Response> AgentHeartbeat(AgentHeartbeatRequest request,  ServerCallContext context)
+    public override Task<Response> AgentHeartbeat(AgentHeartbeatRequest request, ServerCallContext context)
     {
         return Task.FromResult(agentConnect.AgentHeartbeat(request));
     }
