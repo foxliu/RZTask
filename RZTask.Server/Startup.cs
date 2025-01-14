@@ -19,7 +19,9 @@ public class Startup
         services.AddHostedService<InitializeBackgroundService>();
         services.AddControllers();
         services.AddGrpc();  // 添加 gRPC 服务
-        services.AddDbContext<AppDbContext>(option => option.UseMySQL(connectionString));
+        services.AddDbContext<AppDbContext>(option =>
+            option.UseMySQL(connectionString)
+                .UseLoggerFactory(LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Warning))));  // 这里关闭SQL日志输出
         services.AddTransient<AgentConnect>();
     }
 
