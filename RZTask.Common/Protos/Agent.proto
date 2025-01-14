@@ -23,10 +23,12 @@ message TaskRequest {
 
 	string taskId = 1;			// 任务ID
 	TaskType type = 2;			// 任务类型
-	string fileName = 3;		// 从Server端传送给Agent端的文件，当type为EXECUTABLE_FILE和DLL时必需
+	string programFileName = 3;		// 从Server端传送给Agent端的文件，当type为EXECUTABLE_FILE和DLL时必需
 	string functionType = 4;	// 反射调用使用的命名空间.类名
 	string functionName = 5;	// CMD & SH: 执行命令的绝对路径或是在Path中的，EXECUTABLE_FILE: 与fileName相同，DLL：调用的函数
 	string functionParmas = 6;	// 函数调用的参数，shell的参数以空格为分割符，其他的参数以逗号为分割符
+	repeated string files = 7;    // 需要传输的文件列表
+	uint32 timeout = 8;
 }
 
 // 任务响应
@@ -36,6 +38,7 @@ message TaskResponse {
 		IN_PROGRESS = 1;
 		COMPLETED = 2;
 		FAILED = 9;
+		CANCEL = 3;
 	}
 
 	string taskId = 1;		// 任务ID

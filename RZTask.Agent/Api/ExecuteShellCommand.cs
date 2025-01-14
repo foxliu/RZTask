@@ -3,12 +3,14 @@ using RZTask.Common.Utils;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using Timer = System.Timers.Timer;
 
 namespace RZTask.Agent.Api
 {
-    public class ExecuteShellCommand
+    public class ExecuteShellCommand : ICommandInterface
     {
         private readonly Serilog.ILogger _logger;
+        private readonly IConfiguration _configuration;
 
         private string _fileName = string.Empty;
         private List<string> _arguments = new List<string>();
@@ -21,62 +23,53 @@ namespace RZTask.Agent.Api
 
         private readonly ApplicationStore _applicationStore = ApplicationStore.Instance;
 
+        private Queue<string> _outputBuffer = new Queue<string>();
+        private Timer? _outputTimer;
 
-        public ExecuteShellCommand(Serilog.ILogger logger)
+        private static readonly Regex _parameterRegex = new Regex(@"['""].+?['""]|[^ ]+", RegexOptions.Compiled);
+
+
+        public ExecuteShellCommand(Serilog.ILogger logger, IConfiguration config)
         {
             _logger = logger;
+            _configuration = config;
+        }
+
+        private void AddArgumentsForCommand(string commandLine)
+        {
+            foreach (Match param in _parameterRegex.Matches(commandLine))
+            {
+                _arguments.Add(param.Value);
+            }
         }
 
         public void InitializationCmd(TaskRequest request)
         {
-            string pattern = @"['""].+?['""]|[^ ]+";
-
             switch (request.Type)
             {
                 case TaskRequest.Types.TaskType.Cmd:
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    {
-                        _fileName = "cmd.exe";
-                        foreach (Match parma in Regex.Matches($"/C {request.FunctionName} {request.FunctionParmas}", pattern))
-                        {
-                            _arguments.Add(parma.Value);
-                        }
-                    }
-                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                    {
-                        _fileName = "/bin/bash";
-                        foreach (Match parma in Regex.Matches($"-c {request.FunctionName} {request.FunctionParmas}", pattern))
-                        {
-                            _arguments.Add(parma.Value);
-                        }
-                    }
+                    _fileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "cmd.exe" : "/bin/bash";
+                    var paramTag = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "/C" : "-c";
+                    AddArgumentsForCommand($"{paramTag} {request.FunctionName} {request.FunctionParmas}");
+                    _logger.Debug($"{_fileName}, {_arguments}");
                     break;
                 case TaskRequest.Types.TaskType.Sh:
                     _fileName = "/bin/sh";
-                    foreach (Match parma in Regex.Matches($"-c {request.FunctionName} {request.FunctionParmas}", pattern))
-                    {
-                        _arguments.Add(parma.Value);
-                    }
+                    AddArgumentsForCommand($"-c {request.FunctionName} {request.FunctionParmas}");
                     break;
                 case TaskRequest.Types.TaskType.ShellScript:
                     _fileName = "/bin/bash";
-                    var scriptFilePath = Path.Combine(_applicationStore!.ExecableFileDirectory, request.FileName);
-                    foreach (Match parma in Regex.Matches($"-c {scriptFilePath} {request.FunctionParmas}", pattern))
-                    {
-                        _arguments.Add(parma.Value);
-                    }
+                    var scriptFilePath = Path.Combine(_applicationStore!.ExecableFileDirectory, request.ProgramFileName);
+                    AddArgumentsForCommand($"-c {scriptFilePath} {request.FunctionParmas}");
                     break;
                 case TaskRequest.Types.TaskType.BinaryFile:
-                    _fileName = Path.Combine(_applicationStore!.ExecableFileDirectory, request.FileName);
-                    foreach (Match parma in Regex.Matches(request.FunctionParmas, pattern))
-                    {
-                        _arguments.Add(parma.Value);
-                    }
+                    _fileName = Path.Combine(_applicationStore!.ExecableFileDirectory, request.ProgramFileName);
+                    AddArgumentsForCommand(request.FunctionParmas);
                     break;
             }
         }
 
-        public void Start()
+        public async Task Start(CancellationToken cancellationToken)
         {
             var psi = new ProcessStartInfo
             {
@@ -93,47 +86,83 @@ namespace RZTask.Agent.Api
                 psi.ArgumentList.Add(parma);
             }
 
-            var process = new Process
+            using (var process = new Process())
             {
-                StartInfo = psi,
-            };
+                process.StartInfo = psi;
 
-            process.OutputDataReceived += (sender, args) =>
-            {
-                if (args.Data != null)
+                if (_outputTimer == null)
                 {
-                    OnOutputReceived?.Invoke(args.Data);
+                    _outputTimer = new Timer(500);
+                    _outputTimer.Elapsed += (sender, e) => FlushBuffer();
+                }
+                _outputTimer.Start();
+
+                process.OutputDataReceived += (sender, args) =>
+                {
+                    if (args.Data != null)
+                    {
+                        _outputBuffer.Enqueue(args.Data);
+                    }
+                };
+
+                process.ErrorDataReceived += (sender, args) =>
+                {
+                    if (args.Data != null)
+                    {
+                        _outputBuffer.Enqueue($"[ERROR] {args.Data}");
+                    }
+                };
+
+                try
+                {
+                    if (!process.Start())
+                    {
+                        var commandLine = $"{_fileName} {string.Join(" ", _arguments)}";
+                        _logger.Error($"命令启动失败: {commandLine}");
+                    }
+
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
+
+                    var processCompletionTask = Task.Run(() =>
+                    {
+                        process.WaitForExit();
+                    }, cancellationToken);
+
+                    var timeout = _configuration.GetValue<int>("TaskTimeout") * 1000;
+                    var timeoutTask = Task.Delay(timeout, cancellationToken);
+                    var completedTask = await Task.WhenAny(processCompletionTask, timeoutTask);
+                    if (completedTask == timeoutTask)
+                    {
+                        _logger.Error($"命令超时，强制停止进程: {_fileName} {string.Join(" ", _arguments)}");
+                        process.Kill();
+                    }
+
+
+                    await processCompletionTask;
+
+                    _returnCode = process.ExitCode;
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, $"命令执行失败: {_fileName} {string.Join(" ", _arguments)}");
+                    if (ex.StackTrace != null) { _logger.Error(ex.StackTrace); }
+                }
+                finally
+                {
+                    FlushBuffer();
+                    _outputTimer?.Stop();
+                    _outputTimer?.Dispose();
                 }
             };
+        }
 
-            process.ErrorDataReceived += (sender, args) =>
+        private void FlushBuffer()
+        {
+            while (_outputBuffer.Count > 0)
             {
-                if (args.Data != null)
-                {
-                    OnOutputReceived?.Invoke($"[ERROR] {args.Data}");
-                }
-            };
-
-            try
-            {
-                if (!process.Start())
-                {
-                    _logger.Error($"命令启动失败: {_fileName} {@_arguments}");
-                }
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-
-                process.WaitForExit();
-                _returnCode = process.ExitCode;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"命令执行失败: {ex.Message}");
-                if (ex.StackTrace != null) { _logger.Error(ex.StackTrace); }
-            }
-            finally
-            {
-                process.Dispose();
+                var data = _outputBuffer.Dequeue();
+                OnOutputReceived?.Invoke(data);
             }
         }
     }

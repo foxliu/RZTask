@@ -30,9 +30,18 @@ namespace RZTask.Agent.Services
                     ReturnCode = -99,
                 });
 
-                _executeShellCommand.InitializationCmd(request);
+                ICommandInterface? commandInterface = request.Type switch
+                {
+                    TaskRequest.Types.TaskType.Cmd => _executeShellCommand,
+                    TaskRequest.Types.TaskType.Sh => _executeShellCommand,
+                    TaskRequest.Types.TaskType.BinaryFile => _executeShellCommand,
+                    TaskRequest.Types.TaskType.ShellScript => _executeShellCommand,
+                    _ => null
+                } ?? throw new InvalidOperationException($"没有匹配的任务类型: {request.Type}");
 
-                _executeShellCommand.OnOutputReceived += async (output) =>
+                commandInterface.InitializationCmd(request);
+
+                commandInterface.OnOutputReceived += async (output) =>
                 {
                     if (!string.IsNullOrEmpty(output))
                     {
@@ -46,14 +55,33 @@ namespace RZTask.Agent.Services
                     }
                 };
 
-                _executeShellCommand.Start();
+                var cancelationTokenSource = new CancellationTokenSource();
+                var timeoutTask = Task.Delay((int)request.Timeout * 1000);
+                var commandTask = commandInterface.Start(cancelationTokenSource.Token);
+
+                var completedTask = await Task.WhenAny(commandTask, timeoutTask);
+
+                if (completedTask == timeoutTask)
+                {
+                    cancelationTokenSource.Cancel();
+
+                    await streamWriter.WriteAsync(new TaskResponse
+                    {
+                        TaskId = request.TaskId,
+                        Status = TaskResponse.Types.TaskStatus.Cancel,
+                        Result = $"Task {request.TaskId} executed timeout, cancel",
+                        ReturnCode = -1
+                    });
+                }
+
+                await commandTask.ConfigureAwait(false);
 
                 await streamWriter.WriteAsync(new TaskResponse
                 {
                     TaskId = request.TaskId,
                     Status = TaskResponse.Types.TaskStatus.Completed,
-                    Result = $"Task {request.TaskId} executed successfully",
-                    ReturnCode = _executeShellCommand.ReturnCode
+                    Result = $"Task {request.TaskId} executed Completed",
+                    ReturnCode = commandInterface.ReturnCode
                 });
             }
             catch (Exception ex)
@@ -71,7 +99,6 @@ namespace RZTask.Agent.Services
                     ReturnCode = -1,
                 });
             }
-            await Task.CompletedTask;
         }
     }
 }

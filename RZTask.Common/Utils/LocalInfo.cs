@@ -161,7 +161,7 @@ namespace RZTask.Common.Utils
             }
             catch (Exception ex)
             {
-                logger.Error($"Get app_name error: {ex.Message}, return default app_name: {defaultAppname}");
+                logger.Warning($"Get app_name error: {ex.Message}, return default app_name: {defaultAppname}");
                 return defaultAppname;
             }
         }

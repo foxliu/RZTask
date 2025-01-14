@@ -46,9 +46,11 @@ namespace RZTask.Server.Controllers
                     TaskId = agentId,
                     Type = TaskRequest.Types.TaskType.Cmd,
                     FunctionType = "",
-                    FileName = "",
+                    ProgramFileName = "",
                     FunctionName = "ipconfig",
-                    FunctionParmas = "/all"
+                    FunctionParmas = "/all",
+                    Files = { },
+                    Timeout = 30000
                 };
 
                 using var call = client.ExecuteTask(taskRequest);
